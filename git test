@@ -1,0 +1,45 @@
+#include <elapsedMillis.h>
+
+const int LM35_PIN = A0;    // Analog pin for LM35 temperature sensor
+const int LED_PIN = 11;     // Onboard LED pin for blinking
+
+const int LOW_TEMP_THRESHOLD = 30;   // Temperature threshold for LED blinking change
+const int LOW_TEMP_INTERVAL = 250;   // Blink interval for temperature below the threshold
+const int HIGH_TEMP_INTERVAL = 500;  // Blink interval for temperature above the threshold
+
+int Temp = 0;
+int blinkInterval = LOW_TEMP_INTERVAL;
+elapsedMillis blinkTimer;
+
+void setup() {
+  pinMode(LM35_PIN, INPUT); //Pin mode of Temperature sensor is set as input
+  pinMode(LED_PIN, OUTPUT); //Pin mode of LED is set as output
+}
+
+void loop() {
+  // Read temperature from LM35 sensor
+  Temp = readTemperature();
+  // Check temperature and update blink interval
+  if (Temp < LOW_TEMP_THRESHOLD){
+    blinkInterval = LOW_TEMP_INTERVAL;
+  } 
+  else {
+    blinkInterval = HIGH_TEMP_INTERVAL;
+  }
+
+  // Toggle LED based on blink interval
+  if (blinkTimer >= blinkInterval) {
+    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+    blinkTimer = 0;  // Reset the timer
+  }
+}
+
+int readTemperature() {
+  // Read analog voltage from LM35 sensor and convert to temperature in Celsius
+  int sensorValue = analogRead(LM35_PIN);
+  float voltage = sensorValue * (5.0 / 1023.0);
+  float temperatureCelsius = (voltage - 0.5) * 100.0;
+
+  return static_cast<int>(temperatureCelsius);
+}
+
